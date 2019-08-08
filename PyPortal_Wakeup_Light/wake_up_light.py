@@ -86,6 +86,7 @@ pyportal.splash.append(time_textarea)
 pyportal.splash.append(wakeup_time_textarea)
 pyportal.splash.append(light_on_time_textarea)
 
+# get current time on boot
 while True:
     try:
         print("Getting time from internet!")
@@ -116,15 +117,17 @@ def parseTime(time_before):
 
 # get time objects for wake up times
 def getWakeUpTimes():
+    print("Updated times: ")
     for i in range(len(wake_up_times)):
         parsed_time_day = parseTime(wake_up_times[i])
         hours, minutes = parsed_time_day[0:2]
         now_day = time.localtime()
         time_obj_mk = time.mktime((now_day[0], now_day[1], now_day[2], hours,
-                                   minutes, now_day[5], i, now_day[7], now_day[8]))
+                                   minutes, now_day[5], now_day[6], now_day[7], now_day[8]))
         time_obj = time.localtime(time_obj_mk)
         val_times.append(time_obj_mk)
         parsed_times.append(time_obj)
+        print(val_times[i])
 
 # determine which day it is and print which time waking up on screen
 def whichDay():
@@ -213,17 +216,18 @@ while True:
             pyportal.get_local_time()
             refresh_time = time.monotonic()
             time_now = time.localtime()
+            getWakeUpTimes()
         except RuntimeError as e:
             print("Some error occured, retrying! -", e)
             continue
     # At midnight or when program detects a change in day, update the wake up times for the new day
-    print("Current day= ", current_day, "check day =", check_day)
     if check_day == current_day:
         current_day = time_now[6]
     else:
         print("it's a new day!")
         check_day = current_day
         getWakeUpTimes()
+    print("Current day= ", current_day, "check day =", check_day)
 
     time_str_text = displayTime()
     print(time_str_text)
