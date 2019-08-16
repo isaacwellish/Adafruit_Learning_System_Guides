@@ -117,6 +117,7 @@ def parseTime(time_before):
 
 # get time objects for wake up times
 def getWakeUpTimes():
+    val_times = []
     print("Updated times: ")
     for i in range(len(wake_up_times)):
         parsed_time_day = parseTime(wake_up_times[i])
@@ -127,7 +128,9 @@ def getWakeUpTimes():
         time_obj = time.localtime(time_obj_mk)
         val_times.append(time_obj_mk)
         parsed_times.append(time_obj)
-        print(val_times[i])
+        print(val_times[i], ", ", now_day[6]) # print time values and supposed current day
+    print(now_day) # print current day's time info
+    print(val_times)
 
 # determine which day it is and print which time waking up on screen
 def whichDay():
@@ -214,6 +217,7 @@ while True:
         try:
             print("Getting time from internet!")
             pyportal.get_local_time()
+            print(pyportal.get_local_time()) # what is this actually printing out??
             refresh_time = time.monotonic()
             time_now = time.localtime()
             getWakeUpTimes()
