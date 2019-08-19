@@ -30,6 +30,7 @@ wake_up_times = (up_time_monday,
 days_str = ("Mon.", "Tues.", "Wed.", "Thurs.", "Fri.", "Sat.", "Sun.")
 val_times = []
 parsed_times = []
+updated_times = []
 
 # set neopixel min and max brightness
 BRIGHTNESS = 0
@@ -131,16 +132,17 @@ def getWakeUpTimes():
         print(val_times[i], ", ", now_day[6]) # print time values and supposed current day
     print(now_day) # print current day's time info
     print(val_times)
+    return val_times
 
 # determine which day it is and print which time waking up on screen
-def whichDay():
+def whichDay(times):
     now = time.localtime()
     current_day = now[6]
     now_mk = time.mktime((now[0], now[1], now[2], now[3], now[4], now[5], now[6], now[7], now[8]))
     # if it's after midnight and before todays wakeup time, display the wake up time of today
-    print("Now value: ", now_mk, ", wake up time value: ", val_times[current_day])
+    print("Now value: ", now_mk, ", wake up time value: ", times[current_day])
     for day in range(len(wake_up_times)):
-        if now_mk < val_times[day]:
+        if now_mk < times[day]:
             if current_day == day:
                 input_wake_up_time = wake_up_times[day]
                 use_day = day
@@ -179,10 +181,10 @@ def formatTime(raw_hours, raw_minutes):
     time_str = format_str % (raw_hours, raw_minutes)
     return time_str
 
-def backLight():
+def backLight(times):
     now = time.localtime()
     now_val = time.mktime((now[0], now[1], now[2], now[3], now[4], now[5], now[6], now[7], now[8]))
-    wake_up_day_val = val_times[now[6]]
+    wake_up_day_val = times[now[6]]
     # if time is more than 9 hours after current day's wake up time,
     # or time is before light start time, backlight off, tap to turn on
     if (now_val - wake_up_day_val) > 32400 or (now_val - wake_up_day_val) < -1800:
@@ -207,7 +209,8 @@ def subtract30min(day): # subtract 30 min
     light_on_time_textarea.text = "Light starting at: " + formatTime(hour_minus30, minutes_minus30)
     return formatTime(hour_minus30, minutes_minus30)
 
-getWakeUpTimes()
+
+updated_times = getWakeUpTimes()
 
 refresh_time = 0
 
@@ -220,7 +223,7 @@ while True:
             print(pyportal.get_local_time()) # what is this actually printing out??
             refresh_time = time.monotonic()
             time_now = time.localtime()
-            getWakeUpTimes()
+            updated_times = getWakeUpTimes()
         except RuntimeError as e:
             print("Some error occured, retrying! -", e)
             continue
@@ -230,16 +233,16 @@ while True:
     else:
         print("it's a new day!")
         check_day = current_day
-        getWakeUpTimes()
+        updated_times = getWakeUpTimes()
     print("Current day= ", current_day, "check day =", check_day)
 
     time_str_text = displayTime()
     print(time_str_text)
     # determine which wake up time to choose based on the day
-    wake_up_day = whichDay()
+    wake_up_day = whichDay(updated_times)
     # if time is more than 9 hours after previous day's wake up time,
     # backlight off and can tap to turn on
-    backLight()
+    backLight(updated_times)
     # start the light 30 min before wake up time
     start_light_time = subtract30min(wake_up_day)
     # If current day is same as wake up day and
