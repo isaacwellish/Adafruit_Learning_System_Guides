@@ -11,7 +11,7 @@ from adafruit_bitmap_font import bitmap_font
 from adafruit_display_text.Label import Label
 
 # type in time to get up  each day of the week
-default_wake_up = "6:30A"
+default_wake_up = "12:32A"
 up_time_monday = default_wake_up
 up_time_tuesday = default_wake_up
 up_time_wednesday = default_wake_up
@@ -212,11 +212,12 @@ def subtract30min(day): # subtract 30 min
 
 updated_times = getWakeUpTimes()
 
-refresh_time = 0
+refresh_time = time.monotonic()
 
 while True:
-    # only query the online time once per hour
-    if (time.monotonic() - refresh_time) > 3600:
+    # only query the online time once every 10 min
+    print("timer: ",time.monotonic() - refresh_time)
+    if (time.monotonic() - refresh_time) > 360:
         try:
             print("Getting time from internet!")
             pyportal.get_local_time()
